@@ -6,6 +6,40 @@
 #include <cstdlib>
 #include <vector>
 #include <cstring>
+#include <map>
+#include <optional>
+
+struct QueueFamilyIndices {
+    std::optional<uint32_t> graphicsFamily;
+	
+	bool isComplete() {
+        return graphicsFamily.has_value();
+    }
+};
+
+
+QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device) {
+    QueueFamilyIndices indices;
+	uint32_t queueFamilyCount = 0;
+	vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
+
+	std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
+	vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
+	int i = 0;
+	for (const auto& queueFamily : queueFamilies) {
+
+		if (indices.isComplete()) {
+    	    break;
+    	}
+		
+		if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+			indices.graphicsFamily = i;
+		}
+
+		i++;
+	}
+    return indices;
+}
 
 class HelloTriangleApplication {
 public:
@@ -25,7 +59,10 @@ private:
 	const std::vector<const char*> validationLayers = {
 		"VK_LAYER_KHRONOS_validation"
 	};
-	
+	VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
+	VkDevice device;
+	VkQueue graphicsQueue;
+
 	#ifdef NDEBUG
 		const bool enableValidationLayers = false;
 	#else
@@ -89,6 +126,116 @@ private:
 	void initVulkan() {
 		createInstance();
 		setupDebugMessenger();
+		pickPhysicalDevice();
+		createLogicalDevice();
+	}
+
+	void createLogicalDevice() {
+		QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
+
+		VkDeviceQueueCreateInfo queueCreateInfo{};
+		queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+		queueCreateInfo.queueFamilyIndex = indices.graphicsFamily.value();
+		queueCreateInfo.queueCount = 1;
+
+		float queuePriority = 1.0f;
+		queueCreateInfo.pQueuePriorities = &queuePriority;
+
+		VkPhysicalDeviceFeatures deviceFeatures{};
+
+		VkDeviceCreateInfo createInfo{};
+		createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+		createInfo.pQueueCreateInfos = &queueCreateInfo;
+		createInfo.queueCreateInfoCount = 1;
+		createInfo.pEnabledFeatures = &deviceFeatures;
+
+		createInfo.enabledExtensionCount = 0;
+
+		if (enableValidationLayers) {
+			createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
+			createInfo.ppEnabledLayerNames = validationLayers.data();
+		} else {
+			createInfo.enabledLayerCount = 0;
+		}
+
+		if (vkCreateDevice(physicalDevice, &createInfo, nullptr, &device) != VK_SUCCESS) {
+			throw std::runtime_error("failed to create logical device!");
+		}
+
+		vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0, &graphicsQueue);
+	}
+	
+	void pickPhysicalDevice() {
+		uint32_t deviceCount = 0;
+		vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
+		if (deviceCount == 0) {
+    		throw std::runtime_error("failed to find GPUs with Vulkan support!");
+		}
+		// std::cout << deviceCount << "\n";
+		std::vector<VkPhysicalDevice> devices(deviceCount);
+		vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
+
+		for (const auto& device : devices) {
+			if (isDeviceSuitable(device)) {
+				physicalDevice = device;
+				break;
+			}
+		}
+
+		if (physicalDevice == VK_NULL_HANDLE) {
+			throw std::runtime_error("failed to find a suitable GPU!");
+		}
+
+	    // std::multimap<int, VkPhysicalDevice> candidates;
+
+		// for (const auto& device : devices) {
+		// 	int score = rateDeviceSuitability(device);
+		// 	candidates.insert(std::make_pair(score, device));
+		// }
+
+		// // Check if the best candidate is suitable at all
+		// if (candidates.rbegin()->first > 0) {
+		// 	physicalDevice = candidates.rbegin()->second;
+		// } else {
+		// 	throw std::runtime_error("failed to find a suitable GPU!");
+		// }
+	}
+
+	int rateDeviceSuitability(VkPhysicalDevice device) {
+		VkPhysicalDeviceFeatures deviceFeatures;
+		VkPhysicalDeviceProperties deviceProperties;
+		vkGetPhysicalDeviceProperties(device, &deviceProperties);
+		vkGetPhysicalDeviceProperties(device, &deviceProperties);
+
+		int score = 0;
+		std::cout << deviceProperties.deviceName << "\n";
+		// Discrete GPUs have a significant performance advantage
+		if (deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
+			score += 1000;
+		}
+
+		// Maximum possible size of textures affects graphics quality
+		score += deviceProperties.limits.maxImageDimension2D;
+
+		// Application can't function without geometry shaders
+		if (!deviceFeatures.geometryShader) {
+			return 0;
+		}
+
+		return score;
+	}
+
+	bool isDeviceSuitable(VkPhysicalDevice device) {
+		// VkPhysicalDeviceProperties deviceProperties;
+		// VkPhysicalDeviceFeatures deviceFeatures;
+		// vkGetPhysicalDeviceProperties(device, &deviceProperties);
+		// vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
+
+		// return deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU &&
+		// 	deviceFeatures.geometryShader;
+		QueueFamilyIndices indices = findQueueFamilies(device);
+
+		return indices.isComplete();
 	}
 
 	void setupDebugMessenger() 
@@ -218,6 +365,8 @@ private:
 	}
 
 	void cleanup() {
+		vkDestroyDevice(device, nullptr);
+
 		if (enableValidationLayers) {
 			DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
 		}
