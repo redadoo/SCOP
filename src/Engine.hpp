@@ -82,6 +82,7 @@ private:
 	void createLogicalDevice();
 	void pickPhysicalDevice();
 	void createImageViews();
+	void createGraphicsPipeline();
 	int rateDeviceSuitability(VkPhysicalDevice device);
 	bool isDeviceSuitable(VkPhysicalDevice device);
 	bool checkDeviceExtensionSupport(VkPhysicalDevice device);

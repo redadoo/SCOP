@@ -83,6 +83,12 @@ void Engine::initVulkan() {
 	createLogicalDevice();
 	createSwapChain();
 	createImageViews();
+	createGraphicsPipeline();
+}
+
+void createGraphicsPipeline()
+{
+
 }
 
 void Engine::createImageViews() 
