@@ -51,7 +51,7 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.cpp $(HEADER)
 	@$(CXX) $(CXXFLAGS) -c $< -o $@
 
 run: re
-	./$(NAME)
+	./$(NAME) 2>error
 
 leaks: re
 	@valgrind --track-origins=yes --leak-check=full --show-leak-kinds=all --log-file=leaks.txt ./$(NAME)
