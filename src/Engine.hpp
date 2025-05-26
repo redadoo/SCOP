@@ -14,6 +14,8 @@
 #include <limits> // Necessary for std::numeric_limits
 #include <algorithm> // Necessary for std::clamp
 
+#include "utility.cpp"
+
 struct QueueFamilyIndices {
     std::optional<uint32_t> graphicsFamily;
 	std::optional<uint32_t> presentFamily;
@@ -35,6 +37,15 @@ private:
 	VkSurfaceKHR surface;
 	VkQueue presentQueue;
 	VkSwapchainKHR swapChain;
+	VkRenderPass renderPass;
+	VkCommandPool commandPool;
+	VkPipelineLayout pipelineLayout;
+	VkPipeline graphicsPipeline;
+	VkCommandBuffer commandBuffer;
+	VkSemaphore imageAvailableSemaphore;
+	VkSemaphore renderFinishedSemaphore;
+	VkFence inFlightFence;
+	std::vector<VkFramebuffer> swapChainFramebuffers;
 	std::vector<VkImage> swapChainImages;
 	std::vector<VkImageView> swapChainImageViews;
 	VkFormat swapChainImageFormat;
@@ -75,7 +86,7 @@ private:
     }
 
 	void createSurface();
-	bool checkValidationLayerSupport();
+	void createFramebuffers();
 	void initWindow();
 	void initVulkan();
 	void createSwapChain();
@@ -83,10 +94,18 @@ private:
 	void pickPhysicalDevice();
 	void createImageViews();
 	void createGraphicsPipeline();
+	void createRenderPass();
+	void createCommandPool();
+	void createCommandBuffer();
+	void drawFrame();
+	void createSyncObjects();
+	void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
 	int rateDeviceSuitability(VkPhysicalDevice device);
+	bool checkValidationLayerSupport();
 	bool isDeviceSuitable(VkPhysicalDevice device);
 	bool checkDeviceExtensionSupport(VkPhysicalDevice device);
 	QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
+	VkShaderModule createShaderModule(const std::vector<char>& code);
 	SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
 	VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
 	VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
