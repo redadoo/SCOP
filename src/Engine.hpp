@@ -43,6 +43,7 @@ private:
     VkDevice device;
     VkQueue graphicsQueue;
     VkSurfaceKHR surface;
+	VkQueue presentQueue;
 
     // Swapchain
     VkSwapchainKHR swapChain;
