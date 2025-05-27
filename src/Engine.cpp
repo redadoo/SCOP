@@ -508,20 +508,19 @@ void Engine::pickPhysicalDevice()
 		throw std::runtime_error("failed to find a suitable GPU!");
 	}
 
-	// set a score for all the device founded and pick the highest
-	// std::multimap<int, VkPhysicalDevice> candidates;
+	std::multimap<int, VkPhysicalDevice> candidates;
 
-	// for (const auto& device : devices) {
-	// 	int score = rateDeviceSuitability(device);
-	// 	candidates.insert(std::make_pair(score, device));
-	// }
+	for (const auto& device : devices) {
+		int score = rateDeviceSuitability(device);
+		candidates.insert(std::make_pair(score, device));
+	}
 
-	// // Check if the best candidate is suitable at all
-	// if (candidates.rbegin()->first > 0) {
-	// 	physicalDevice = candidates.rbegin()->second;
-	// } else {
-	// 	throw std::runtime_error("failed to find a suitable GPU!");
-	// }
+	// Check if the best candidate is suitable at all
+	if (candidates.rbegin()->first > 0) {
+		physicalDevice = candidates.rbegin()->second;
+	} else {
+		throw std::runtime_error("failed to find a suitable GPU!");
+	}
 }
 
 int Engine::rateDeviceSuitability(VkPhysicalDevice device) 
@@ -532,7 +531,7 @@ int Engine::rateDeviceSuitability(VkPhysicalDevice device)
 	vkGetPhysicalDeviceProperties(device, &deviceProperties);
 
 	int score = 0;
-	std::cout << deviceProperties.deviceName << "\n";
+	// std::cout << deviceProperties.deviceName << "\n";
 	// Discrete GPUs have a significant performance advantage
 	if (deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
 		score += 1000;

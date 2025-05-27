@@ -11,7 +11,7 @@ OBJDIR      		= 	.objFiles
 SRCDIR      		= 	src
 
 # Specify source files
-FILES       		= 	main Engine
+FILES       		= 	main Engine utility
 
 SRC         		= 	$(addprefix $(SRCDIR)/, $(FILES:=.cpp))
 OBJ         		= 	$(addprefix $(OBJDIR)/, $(FILES:=.o))
