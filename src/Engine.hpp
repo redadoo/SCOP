@@ -29,6 +29,8 @@ struct SwapChainSupportDetails {
 
 class Engine {
 public:
+	bool framebufferResized = false;
+
 	void run();
 
 private:
@@ -60,15 +62,21 @@ private:
 
     // Command Buffers
     VkCommandPool commandPool;
-    VkCommandBuffer commandBuffer;
-
-    // Synchronization
-    VkSemaphore imageAvailableSemaphore;
-    VkSemaphore renderFinishedSemaphore;
-    VkFence inFlightFence;
+	std::vector<VkCommandBuffer> commandBuffers;
+    
+	// Synchronization
+	std::vector<VkSemaphore> imageAvailableSemaphores;
+	std::vector<VkSemaphore> renderFinishedSemaphores;
+	std::vector<VkFence> inFlightFences;
 
     // Validation & Debug
     VkDebugUtilsMessengerEXT debugMessenger;
+
+	// frame
+	uint32_t currentFrame = 0;
+	
+	// const
+	const int MAX_FRAMES_IN_FLIGHT = 2;
 
     #ifdef NDEBUG
         const bool enableValidationLayers = false;
@@ -100,6 +108,8 @@ private:
 
 	// swapchain
 	void createSwapChain();
+	void recreateSwapChain();
+	void cleanupSwapChain();
 	void createImageViews();
 	void createFramebuffers();
 	SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
@@ -114,7 +124,7 @@ private:
 
 	//  Command Buffers & Sync
 	void createCommandPool();
-	void createCommandBuffer();
+	void createCommandBuffers();
 	void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
 	void createSyncObjects();
 
