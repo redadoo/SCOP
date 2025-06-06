@@ -50,6 +50,5 @@ clean:
 fclean: clean
 	@$(RM) $(NAME)
 	@$(RM) leaks.txt
-	@$(RM) webserver.log
 
 re: fclean all
