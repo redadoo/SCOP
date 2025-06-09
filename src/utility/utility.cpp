@@ -1,5 +1,6 @@
 #include "utility.hpp"
 #include <stdexcept>
+#include <vulkan/vulkan_core.h>
 
 std::vector<char> readFile(const std::string& filename) 
 {

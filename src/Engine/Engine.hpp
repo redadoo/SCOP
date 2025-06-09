@@ -14,6 +14,7 @@
 #include <cstdint>
 #include <limits>
 #include <algorithm>
+#include "Data.hpp"
 
 struct QueueFamilyIndices {
     std::optional<uint32_t> graphicsFamily;
@@ -74,9 +75,19 @@ private:
 
 	// frame
 	uint32_t currentFrame = 0;
+
+	//buffer
+	VkBuffer vertexBuffer;
+	VkDeviceMemory vertexBufferMemory;
 	
 	// const
 	const int MAX_FRAMES_IN_FLIGHT = 2;
+
+	const std::vector<Vertex> vertices = {
+		{{0.0f, -0.5f}, {1.0f, 1.0f, 1.0f}},
+		{{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+		{{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
+	};
 
     #ifdef NDEBUG
         const bool enableValidationLayers = false;
@@ -98,7 +109,8 @@ private:
 	void createInstance();
 	void setupDebugMessenger();
 	void createSurface();
-	
+	void createVertexBuffer();
+
 	// device
 	void pickPhysicalDevice();
 	void createLogicalDevice();
@@ -123,6 +135,7 @@ private:
 	VkShaderModule createShaderModule(const std::vector<char>& code);
 
 	//  Command Buffers & Sync
+	void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
 	void createCommandPool();
 	void createCommandBuffers();
 	void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
@@ -147,11 +160,12 @@ private:
 		const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
 		void* pUserData)
     {
-        std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
+		std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
 
 		return VK_FALSE;
     }
 	
 	// other
 	QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
+	uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 };

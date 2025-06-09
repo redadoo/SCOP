@@ -1,42 +1,62 @@
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    Makefile                                           :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: edoardo <you@example.com>                  +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2025/06/09 by edoardo                 #+#    #+#              #
+#    Updated: 2025/06/09 by edoardo                 ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
+
 NAME        		= 	SCOP
 
-CXX        			= 	g++
-CXXFLAGS   			= 	-std=c++17 -O2 #-ftime-report
-LDFLAGS    			= 	-lglfw -lvulkan -ldl -lpthread -lX11 -lXxf86vm -lXrandr -lXi
+CC          		= 	g++ -std=c++17
 RM          		= 	rm -rf
 
 OBJDIR      		= 	.objFiles
 
-# Paths for source and header files
+# Paths
 SRCDIR      		= 	src
+INCDIR      		= 	src
+LIBENGINE   		= 	src/Engine
+LIBUTILITY  		= 	src/utility
+LIBDATA    		    = 	src/Data
 
-# Specify source files
-FILES       		= 	main Engine utility
+# Source files (relative to SRCDIR)
+FILES       		= 	main Engine/Engine utility/utility
 
 SRC         		= 	$(addprefix $(SRCDIR)/, $(FILES:=.cpp))
 OBJ         		= 	$(addprefix $(OBJDIR)/, $(FILES:=.o))
 
-#include the lib/ directory for header files
-INC         		= -lglfw -lvulkan -ldl -lpthread -lX11 -lXxf86vm -lXrandr -lXi
+# Headers (used for dependency tracking)
+HEADER      		= 	$(LIBENGINE)/Engine.hpp $(LIBUTILITY)/utility.hpp $(LIBDATA)/Data.hpp
+
+# Include flags
+INC         		= 	-I$(INCDIR) -I$(LIBUTILITY) -I$(LIBENGINE) -I$(LIBDATA)
+# Libraries
+LDFLAGS     		= 	-lglfw -lvulkan -ldl -lpthread -lX11 -lXxf86vm -lXrandr -lXi
+
+# Colors
 NONE        		= "\033[0m"
 GREEN       		= "\033[32m"
 GRAY        		= "\033[2;37m"
 CURSIVE     		= "\033[3m"
 YELLOW      		= "\033[1;33m"
 
-.PHONY: all clean fclean re leaks
+.PHONY: all clean fclean re run leaks
 
 all: $(NAME)
 
 $(NAME): $(OBJ)
-	@echo $(CURSIVE)$(GRAY) "     - Making object files..." $(NONE)
-	@echo $(CURSIVE) $(GRAY) "     - Compiling $(NAME)..." $(NONE)
-	@$(CXX) $(OBJ) -o $(NAME) $(LDFLAGS)
+	@echo $(CURSIVE)$(GRAY) "     - Compiling $(NAME)..." $(NONE)
+	@$(CC) $(FLAGS) $(INC) $(OBJ) -o $(NAME) $(LDFLAGS)
 	@echo $(GREEN)"- Compiled -"$(NONE)
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp $(HEADER)
 	@mkdir -p $(dir $@)
-	@$(CXX) $(CXXFLAGS) -c $< -o $@
+	@$(CC) $(FLAGS) $(INC) -c $< -o $@
 
 run: re
 	./$(NAME) 2>error
@@ -50,5 +70,6 @@ clean:
 fclean: clean
 	@$(RM) $(NAME)
 	@$(RM) leaks.txt
+	@$(RM) error
 
 re: fclean all
