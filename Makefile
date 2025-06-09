@@ -1,75 +1,71 @@
 # **************************************************************************** #
-#                                                                              #
-#                                                         :::      ::::::::    #
-#    Makefile                                           :+:      :+:    :+:    #
-#                                                     +:+ +:+         +:+      #
-#    By: edoardo <you@example.com>                  +#+  +:+       +#+         #
-#                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2025/06/09 by edoardo                 #+#    #+#              #
-#    Updated: 2025/06/09 by edoardo                 ###   ########.fr        #
-#                                                                              #
+# Makefile for SCOP Project                                                    #
 # **************************************************************************** #
 
-NAME        		= 	SCOP
+# Project
+NAME        := SCOP
 
-CC          		= 	g++ -std=c++17
-RM          		= 	rm -rf
+# Compiler & Flags
+CXX         := g++
+CXXFLAGS    := -std=c++17
+LDFLAGS     := -lglfw -lvulkan -ldl -lpthread -lX11 -lXxf86vm -lXrandr -lXi
 
-OBJDIR      		= 	.objFiles
+# Directories
+SRCDIR      := src
+OBJDIR      := .obj
+INCDIRS     := src src/utility src/Engine src/Data
 
-# Paths
-SRCDIR      		= 	src
-INCDIR      		= 	src
-LIBENGINE   		= 	src/Engine
-LIBUTILITY  		= 	src/utility
-LIBDATA    		    = 	src/Data
+# Shader files
+SHADERDIR   := shaders
+SHADERSRC   := $(wildcard $(SHADERDIR)/*.vert $(SHADERDIR)/*.frag)
 
-# Source files (relative to SRCDIR)
-FILES       		= 	main Engine/Engine utility/utility
-
-SRC         		= 	$(addprefix $(SRCDIR)/, $(FILES:=.cpp))
-OBJ         		= 	$(addprefix $(OBJDIR)/, $(FILES:=.o))
-
-# Headers (used for dependency tracking)
-HEADER      		= 	$(LIBENGINE)/Engine.hpp $(LIBUTILITY)/utility.hpp $(LIBDATA)/Data.hpp
+# Source files
+SRCFILES    := main Engine/Engine utility/utility
+SRC         := $(addprefix $(SRCDIR)/, $(SRCFILES:=.cpp))
+OBJ         := $(addprefix $(OBJDIR)/, $(SRCFILES:=.o))
+DEPS        := $(OBJ:.o=.d)
 
 # Include flags
-INC         		= 	-I$(INCDIR) -I$(LIBUTILITY) -I$(LIBENGINE) -I$(LIBDATA)
-# Libraries
-LDFLAGS     		= 	-lglfw -lvulkan -ldl -lpthread -lX11 -lXxf86vm -lXrandr -lXi
+INCFLAGS    := $(addprefix -I, $(INCDIRS))
 
 # Colors
-NONE        		= "\033[0m"
-GREEN       		= "\033[32m"
-GRAY        		= "\033[2;37m"
-CURSIVE     		= "\033[3m"
-YELLOW      		= "\033[1;33m"
+GREEN       := \033[32m
+GRAY        := \033[2;37m
+YELLOW      := \033[1;33m
+RESET       := \033[0m
 
-.PHONY: all clean fclean re run leaks
+.PHONY: all clean fclean re run leaks shaders
 
-all: $(NAME)
+all: shaders $(NAME)
 
 $(NAME): $(OBJ)
-	@echo $(CURSIVE)$(GRAY) "     - Compiling $(NAME)..." $(NONE)
-	@$(CC) $(FLAGS) $(INC) $(OBJ) -o $(NAME) $(LDFLAGS)
-	@echo $(GREEN)"- Compiled -"$(NONE)
+	@echo "$(GRAY)[Linking] $(NAME)$(RESET)"
+	@$(CXX) $(CXXFLAGS) $(INCFLAGS) $^ -o $@ $(LDFLAGS)
+	@echo "$(GREEN)✓ Build successful$(RESET)"
 
-$(OBJDIR)/%.o: $(SRCDIR)/%.cpp $(HEADER)
+$(OBJDIR)/%.o: $(SRCDIR)/%.cpp
 	@mkdir -p $(dir $@)
-	@$(CC) $(FLAGS) $(INC) -c $< -o $@
+	@echo "$(YELLOW)[Compiling] $<$(RESET)"
+	@$(CXX) $(CXXFLAGS) $(INCFLAGS) -MMD -MP -c $< -o $@
 
 run: re
 	./$(NAME) 2>error
 
 leaks: re
-	@valgrind --track-origins=yes --leak-check=full --show-leak-kinds=all --log-file=leaks.txt ./$(NAME)
+	valgrind --track-origins=yes --leak-check=full --show-leak-kinds=all --log-file=leaks.txt ./$(NAME)
+
+shaders:
+	@echo "$(YELLOW)[Compiling shader] $< -> $@$(RESET)"
+	@bash $(SHADERDIR)/compile.sh
 
 clean:
-	@$(RM) $(OBJDIR)
+	@rm -rf $(OBJDIR)
+	@echo "$(GRAY)✗ Object files cleaned$(RESET)"
 
 fclean: clean
-	@$(RM) $(NAME)
-	@$(RM) leaks.txt
-	@$(RM) error
+	@rm -f $(NAME) leaks.txt error $(SHADERDIR)/*.spv
+	@echo "$(GRAY)✗ Binary, shaders and extra files cleaned$(RESET)"
 
 re: fclean all
+
+-include $(DEPS)
