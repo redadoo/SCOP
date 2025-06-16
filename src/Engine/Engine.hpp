@@ -61,7 +61,12 @@ private:
     VkPipelineLayout pipelineLayout;
     VkPipeline graphicsPipeline;
 
-    // Command Buffers
+	//descriptor
+	VkDescriptorSetLayout descriptorSetLayout;
+	VkDescriptorPool descriptorPool;
+    std::vector<VkDescriptorSet> descriptorSets;
+
+	// Command Buffers
     VkCommandPool commandPool;
 	std::vector<VkCommandBuffer> commandBuffers;
     
@@ -81,7 +86,11 @@ private:
 	VkDeviceMemory vertexBufferMemory;
 	VkBuffer indexBuffer;
 	VkDeviceMemory indexBufferMemory;
-	
+
+	std::vector<VkBuffer> uniformBuffers;
+	std::vector<VkDeviceMemory> uniformBuffersMemory;
+	std::vector<void*> uniformBuffersMapped;
+
 	// const
 	const int MAX_FRAMES_IN_FLIGHT = 2;
 
@@ -149,6 +158,13 @@ private:
 	void createSyncObjects();
 	void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 	void createIndexBuffer();
+	void createUniformBuffers();
+	void updateUniformBuffer(uint32_t currentImage);
+	
+	//descriptor
+	void createDescriptorSetLayout();
+	void createDescriptorPool();
+	void createDescriptorSets();
 
 	// main loop
 	void mainLoop();
