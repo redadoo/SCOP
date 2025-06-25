@@ -14,6 +14,7 @@
 #include <cstdint>
 #include <limits>
 #include <algorithm>
+#include <unordered_map>
 #include "Data.hpp"
 
 struct QueueFamilyIndices {
@@ -99,28 +100,25 @@ private:
 	VkDeviceMemory textureImageMemory;
 	VkImageView textureImageView;
 	VkSampler textureSampler;
+	
+	//Depth
+	VkImage depthImage;
+	VkDeviceMemory depthImageMemory;
+	VkImageView depthImageView;
+
+	//models
+	std::vector<Vertex> vertices;
+	std::vector<uint32_t> indices;
 
 	// const
+	const uint32_t MODEL_WIDTH = 800;
+	const uint32_t MODEL_HEIGHT = 600;
+
+	const std::string MODEL_PATH = "models/viking_room.obj";
+	const std::string TEXTURE_PATH = "textures/viking_room.png";
+
 	const int MAX_FRAMES_IN_FLIGHT = 2;
 
-	// const std::vector<Vertex> vertices = {
-	// 	{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-	// 	{{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
-	// 	{{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
-	// 	{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}
-	// };
-
-	const std::vector<Vertex> vertices = {
-		{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-		{{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
-		{{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
-		{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
-	};
-
-	const std::vector<uint16_t> indices = {
-    	0, 1, 2, 2, 3, 0
-	};
-    
 	#ifdef NDEBUG
         const bool enableValidationLayers = false;
     #else
@@ -190,9 +188,18 @@ private:
 	void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
 	void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
 	void createTextureImageView();
-	VkImageView createImageView(VkImage image, VkFormat format);
+	VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
 	void createTextureSampler();
-	
+
+	//Depth
+	void createDepthResources();
+
+	//stencil
+	bool hasStencilComponent(VkFormat format);
+
+	//models
+	void loadModel();
+
 	// main loop
 	void mainLoop();
 	void drawFrame();
@@ -217,7 +224,9 @@ private:
 		return VK_FALSE;
     }
 	
-	// other
+	// find
+	VkFormat findDepthFormat();
 	QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
 	uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
+	VkFormat findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
 };

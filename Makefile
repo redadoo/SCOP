@@ -7,7 +7,7 @@ NAME        := SCOP
 
 # Compiler & Flags
 CXX         := g++
-CXXFLAGS    := -std=c++17
+CXXFLAGS    := -std=c++17 -O3
 LDFLAGS     := -lglfw -lvulkan -ldl -lpthread -lX11 -lXxf86vm -lXrandr -lXi
 
 # Directories
