@@ -87,18 +87,34 @@ private:
 	VkBuffer indexBuffer;
 	VkDeviceMemory indexBufferMemory;
 
+	VkBuffer stagingBuffer;
+	VkDeviceMemory stagingBufferMemory;
+
 	std::vector<VkBuffer> uniformBuffers;
 	std::vector<VkDeviceMemory> uniformBuffersMemory;
 	std::vector<void*> uniformBuffersMapped;
 
+	//image
+	VkImage textureImage;
+	VkDeviceMemory textureImageMemory;
+	VkImageView textureImageView;
+	VkSampler textureSampler;
+
 	// const
 	const int MAX_FRAMES_IN_FLIGHT = 2;
 
+	// const std::vector<Vertex> vertices = {
+	// 	{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+	// 	{{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
+	// 	{{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
+	// 	{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}
+	// };
+
 	const std::vector<Vertex> vertices = {
-		{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-		{{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
-		{{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
-		{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}
+		{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
+		{{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
+		{{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
+		{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
 	};
 
 	const std::vector<uint16_t> indices = {
@@ -160,12 +176,23 @@ private:
 	void createIndexBuffer();
 	void createUniformBuffers();
 	void updateUniformBuffer(uint32_t currentImage);
-	
+	VkCommandBuffer beginSingleTimeCommands();
+	void endSingleTimeCommands(VkCommandBuffer commandBuffer);
+
 	//descriptor
 	void createDescriptorSetLayout();
 	void createDescriptorPool();
 	void createDescriptorSets();
 
+	//image
+	void createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
+	void createTextureImage();
+	void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
+	void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
+	void createTextureImageView();
+	VkImageView createImageView(VkImage image, VkFormat format);
+	void createTextureSampler();
+	
 	// main loop
 	void mainLoop();
 	void drawFrame();
