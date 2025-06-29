@@ -7,7 +7,7 @@ NAME        := SCOP
 
 # Compiler & Flags
 CXX         := g++
-CXXFLAGS    := -std=c++17 -O3
+CXXFLAGS    := -std=c++17 -O3 -ftime-report
 LDFLAGS     := -lglfw -lvulkan -ldl -lpthread -lX11 -lXxf86vm -lXrandr -lXi
 
 # Directories
@@ -34,22 +34,28 @@ GRAY        := \033[2;37m
 YELLOW      := \033[1;33m
 RESET       := \033[0m
 
+MAKEFLAGS += --no-print-directory
+
 .PHONY: all clean fclean re run leaks shaders
 
-all: shaders $(NAME)
+all:
+	@echo "" > compile_time.txt
+	@$(MAKE) shaders
+	@$(MAKE) $(NAME)
 
 $(NAME): $(OBJ)
 	@echo "$(GRAY)[Linking] $(NAME)$(RESET)"
-	@$(CXX) $(CXXFLAGS) $(INCFLAGS) $^ -o $@ $(LDFLAGS)
+	@$(CXX) $(CXXFLAGS) $(INCFLAGS) $^ -o $@ $(LDFLAGS) 2>> compile_time.txt
 	@echo "$(GREEN)✓ Build successful$(RESET)"
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
 	@mkdir -p $(dir $@)
 	@echo "$(YELLOW)[Compiling] $<$(RESET)"
-	@$(CXX) $(CXXFLAGS) $(INCFLAGS) -MMD -MP -c $< -o $@
+	@$(CXX) $(CXXFLAGS) $(INCFLAGS) -MMD -MP -c $< -o $@ 2>> compile_time.txt
+
 
 run: re
-	./$(NAME) 2>error
+	./$(NAME) cmd 2>error
 
 leaks: re
 	valgrind --track-origins=yes --leak-check=full --show-leak-kinds=all --log-file=leaks.txt ./$(NAME)
