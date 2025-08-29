@@ -54,3 +54,5 @@ make run
 * [GLFW](https://www.glfw.org/)
 * [Vulkan Tutorial](https://vulkan-tutorial.com/Introduction)
 * [matrices](https://www.opengl-tutorial.org/beginners-tutorials/tutorial-3-matrices/)
+* [writing an efficient vulkan renderer](https://zeux.io/2020/02/27/writing-an-efficient-vulkan-renderer/)
+* [Vulkan guide](https://vkguide.dev/)
