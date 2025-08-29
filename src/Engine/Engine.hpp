@@ -11,6 +11,8 @@
 #include <optional>
 #include <set>
 
+#include <cfloat>
+
 #include <cstdint>
 #include <limits>
 #include <algorithm>
@@ -113,6 +115,7 @@ private:
 	//models
 	std::vector<Vertex> vertices;
 	std::vector<uint32_t> indices;
+	Maft::Vector3f modelCenter;
 
 	//sample
 	VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT;

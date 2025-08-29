@@ -10,28 +10,6 @@ struct UniformBufferObject {
     alignas(16) Maft::Matrix4x4f model;
     alignas(16) Maft::Matrix4x4f view;
     alignas(16) Maft::Matrix4x4f proj;
-
-
-    void print()
-    {
-		std::cout << "model raw data : " << "\n";
-        float* data = &model(0,0);
-        for(int i=0;i<16;i++) std::cout << data[i] << " ";
-        std::cout << "\n";
-        std::cout << "model matrix layout data : \n" << model << "\n";
-
-        std::cout << "view" << "\n";
-        float* data1 = &view(0,0);
-        for(int i=0;i<16;i++) std::cout << data1[i] << " ";
-        std::cout << "\n";
-        std::cout << "view matrix layout data : \n" << view << "\n";
-
-        std::cout << "proj" << "\n";
-        float* data2 = &proj(0,0);
-        for(int i=0;i<16;i++) std::cout << data2[i] << " ";
-        std::cout << "\n";
-        std::cout << "proj matrix layout data : \n" << view << "\n";
-    }
 };
 
 struct Vertex {

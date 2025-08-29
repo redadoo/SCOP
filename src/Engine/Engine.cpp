@@ -242,6 +242,9 @@ void Engine::loadModel()
 
 	std::unordered_map<Vertex, uint32_t> uniqueVertices{};
 	
+	Maft::Vector3f minPos(FLT_MAX, FLT_MAX, FLT_MAX);
+	Maft::Vector3f maxPos(-FLT_MAX, -FLT_MAX, -FLT_MAX);
+
 	for (const auto& shape : shapes) 
 	{
 		for (const auto& index : shape.mesh.indices) 
@@ -250,9 +253,17 @@ void Engine::loadModel()
 
 			vertex.pos = {
 				attrib.vertices[3 * index.vertex_index + 0],
-				attrib.vertices[3 * index.vertex_index + 1],
-				attrib.vertices[3 * index.vertex_index + 2]
+				attrib.vertices[3 * index.vertex_index + 2],
+				-attrib.vertices[3 * index.vertex_index + 1]
 			};
+
+			minPos.x = std::min(minPos.x, vertex.pos.x);
+			minPos.y = std::min(minPos.y, vertex.pos.y);
+			minPos.z = std::min(minPos.z, vertex.pos.z);
+
+			maxPos.x = std::max(maxPos.x, vertex.pos.x);
+			maxPos.y = std::max(maxPos.y, vertex.pos.y);
+			maxPos.z = std::max(maxPos.z, vertex.pos.z);
 
 			if (attrib.texcoords.size() > 0)
 			{
@@ -272,6 +283,13 @@ void Engine::loadModel()
 			indices.push_back(uniqueVertices[vertex]);
 		}
 	}
+
+	Maft::Vector3f center = (minPos + maxPos) * 0.5f;
+
+	for (auto& vertex : vertices) 
+		vertex.pos -= center;
+
+	modelCenter = center;
 }
 
 bool Engine::hasStencilComponent(VkFormat format)
@@ -1579,21 +1597,37 @@ void Engine::drawFrame()
 	currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 }
 
+// void Engine::updateUniformBuffer(uint32_t currentImage) 
+// {
+// 	static auto startTime = std::chrono::high_resolution_clock::now();
+// 	auto currentTime = std::chrono::high_resolution_clock::now();
+// 	float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+
+// 	UniformBufferObject ubo{};
+	
+// 	ubo.model = Maft::rotate(Maft::Matrix4x4f::Identity(), time * Maft::radians(-90.0f), Maft::Vector3f(0.0f, 0.0f, 1.0f));
+// 	ubo.view = Maft::lookAt(Maft::Vector3f(2.0f, 3.0f, 2.0f), Maft::Vector3f(0.0f, 0.0f, 0.0f), Maft::Vector3f(0.0f, 0.0f, 1.0f));
+// 	ubo.proj = Maft::perspective(Maft::radians(100.0f), swapChainExtent.width / (float) swapChainExtent.height, 0.1f, 10.0f);
+// 	// ubo.proj(1,1) *= -1;
+
+// 	memcpy(uniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
+// }
+
 void Engine::updateUniformBuffer(uint32_t currentImage) 
 {
-	static auto startTime = std::chrono::high_resolution_clock::now();
-	auto currentTime = std::chrono::high_resolution_clock::now();
-	float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+    static auto startTime = std::chrono::high_resolution_clock::now();
+    auto currentTime = std::chrono::high_resolution_clock::now();
+    float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
-	UniformBufferObject ubo{};
+    UniformBufferObject ubo{};
 
-	ubo.model = Maft::rotate(Maft::Matrix4x4f::Identity(), time * Maft::radians(90.0f), Maft::Vector3f(0.0f, 0.0f, 1.0f));
-	ubo.view = Maft::lookAt(Maft::Vector3f(2.0f, 2.0f, 2.0f), Maft::Vector3f(0.0f, 0.0f, 0.0f), Maft::Vector3f(0.0f, 0.0f, 1.0f));
-	ubo.proj = Maft::perspective(Maft::radians(45.0f), swapChainExtent.width / (float) swapChainExtent.height, 0.1f, 10.0f);
-	ubo.proj(1,1) *= -1;
+    ubo.model = Maft::rotate(Maft::Matrix4x4f::Identity(), time * Maft::radians(90.0f), Maft::Vector3f(0.0f, 0.0f, 1.0f));
+    ubo.view = Maft::lookAt(Maft::Vector3f(2.0f, 2.0f, 0.0f), Maft::Vector3f(0.0f, 0.0f, 0.0f), Maft::Vector3f(0.0f, 0.0f, 1.0f));
+    ubo.proj = Maft::perspective(Maft::radians(100.0f), swapChainExtent.width / (float) swapChainExtent.height, 0.1f, 10.0f);
 
-	memcpy(uniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
+    memcpy(uniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
 }
+
 
 uint32_t Engine::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) {
 	VkPhysicalDeviceMemoryProperties memProperties;
