@@ -1,23 +1,43 @@
 #pragma once
-#define GLM_FORCE_RADIANS
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#define GLM_ENABLE_EXPERIMENTAL
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 #include <array>
 #include <chrono>
-#include <glm/gtx/hash.hpp>
+
+#include "../../lib/Matrix/src/Maft.hpp"
+#include "../../lib/Matrix/src/utils/hash.hpp"
+#include "../../lib/Matrix/src/utils/matrix_utils.hpp"
 
 struct UniformBufferObject {
-	alignas(16) glm::mat4 model;
-	alignas(16) glm::mat4 view;
-	alignas(16) glm::mat4 proj;
+    alignas(16) Maft::Matrix4x4f model;
+    alignas(16) Maft::Matrix4x4f view;
+    alignas(16) Maft::Matrix4x4f proj;
+
+
+    void print()
+    {
+		std::cout << "model raw data : " << "\n";
+        float* data = &model(0,0);
+        for(int i=0;i<16;i++) std::cout << data[i] << " ";
+        std::cout << "\n";
+        std::cout << "model matrix layout data : \n" << model << "\n";
+
+        std::cout << "view" << "\n";
+        float* data1 = &view(0,0);
+        for(int i=0;i<16;i++) std::cout << data1[i] << " ";
+        std::cout << "\n";
+        std::cout << "view matrix layout data : \n" << view << "\n";
+
+        std::cout << "proj" << "\n";
+        float* data2 = &proj(0,0);
+        for(int i=0;i<16;i++) std::cout << data2[i] << " ";
+        std::cout << "\n";
+        std::cout << "proj matrix layout data : \n" << view << "\n";
+    }
 };
 
 struct Vertex {
-	glm::vec3 pos;
-	glm::vec3 color;
-	glm::vec2 texCoord;
+	Maft::Vector3f pos;
+	Maft::Vector3f color;
+	Maft::Vector2f texCoord;
 
 	static VkVertexInputBindingDescription getBindingDescription() {
 		VkVertexInputBindingDescription bindingDescription{};
@@ -57,7 +77,7 @@ struct Vertex {
 namespace std {
     template<> struct hash<Vertex> {
         size_t operator()(Vertex const& vertex) const {
-            return ((hash<glm::vec3>()(vertex.pos) ^ (hash<glm::vec3>()(vertex.color) << 1)) >> 1) ^ (hash<glm::vec2>()(vertex.texCoord) << 1);
+            return ((hash<Maft::Vector3f>()(vertex.pos) ^ (hash<Maft::Vector3f>()(vertex.color) << 1)) >> 1) ^ (hash<Maft::Vector2f>()(vertex.texCoord) << 1);
         }
     };
 }

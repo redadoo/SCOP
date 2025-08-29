@@ -2,6 +2,7 @@
 #include <stb_image.h>
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader.h>
+#include "../../lib/obj_loader/src/obj_loader.hpp"
 
 #include "Engine.hpp"
 
@@ -122,7 +123,8 @@ void Engine::createColorResources()
     colorImageView = createImageView(colorImage, colorFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
 }
 
-VkSampleCountFlagBits Engine::getMaxUsableSampleCount() {
+VkSampleCountFlagBits Engine::getMaxUsableSampleCount() 
+{
     VkPhysicalDeviceProperties physicalDeviceProperties;
     vkGetPhysicalDeviceProperties(physicalDevice, &physicalDeviceProperties);
 
@@ -227,6 +229,9 @@ void Engine::generateMipmaps(VkImage image,VkFormat imageFormat, int32_t texWidt
 
 void Engine::loadModel() 
 {
+	// obj_loader::Mesh mesh = obj_loader::parse(MODEL_PATH);
+    // std::unordered_map<Vertex, uint32_t> uniqueVertices{};
+
 	tinyobj::attrib_t attrib;
 	std::vector<tinyobj::shape_t> shapes;
 	std::vector<tinyobj::material_t> materials;
@@ -1574,17 +1579,18 @@ void Engine::drawFrame()
 	currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 }
 
-void Engine::updateUniformBuffer(uint32_t currentImage) {
+void Engine::updateUniformBuffer(uint32_t currentImage) 
+{
 	static auto startTime = std::chrono::high_resolution_clock::now();
-
 	auto currentTime = std::chrono::high_resolution_clock::now();
 	float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
 	UniformBufferObject ubo{};
-	ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	ubo.proj = glm::perspective(glm::radians(45.0f), swapChainExtent.width / (float) swapChainExtent.height, 0.1f, 10.0f);
-	ubo.proj[1][1] *= -1;
+
+	ubo.model = Maft::rotate(Maft::Matrix4x4f::Identity(), time * Maft::radians(90.0f), Maft::Vector3f(0.0f, 0.0f, 1.0f));
+	ubo.view = Maft::lookAt(Maft::Vector3f(2.0f, 2.0f, 2.0f), Maft::Vector3f(0.0f, 0.0f, 0.0f), Maft::Vector3f(0.0f, 0.0f, 1.0f));
+	ubo.proj = Maft::perspective(Maft::radians(45.0f), swapChainExtent.width / (float) swapChainExtent.height, 0.1f, 10.0f);
+	ubo.proj(1,1) *= -1;
 
 	memcpy(uniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
 }

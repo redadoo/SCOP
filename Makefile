@@ -7,7 +7,7 @@ NAME        := SCOP
 
 # Compiler & Flags
 CXX         := g++
-CXXFLAGS    := -std=c++17 -O3 -ftime-report
+CXXFLAGS    := -std=c++17 -O3
 LDFLAGS     := -lglfw -lvulkan -ldl -lpthread -lX11 -lXxf86vm -lXrandr -lXi
 
 # Directories
@@ -39,19 +39,18 @@ MAKEFLAGS += --no-print-directory
 .PHONY: all clean fclean re run leaks shaders
 
 all:
-	@echo "" > compile_time.txt
 	@$(MAKE) shaders
 	@$(MAKE) $(NAME)
 
 $(NAME): $(OBJ)
 	@echo "$(GRAY)[Linking] $(NAME)$(RESET)"
-	@$(CXX) $(CXXFLAGS) $(INCFLAGS) $^ -o $@ $(LDFLAGS) 2>> compile_time.txt
+	@$(CXX) $(CXXFLAGS) $(INCFLAGS) $^ -o $@ $(LDFLAGS)
 	@echo "$(GREEN)✓ Build successful$(RESET)"
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
 	@mkdir -p $(dir $@)
 	@echo "$(YELLOW)[Compiling] $<$(RESET)"
-	@$(CXX) $(CXXFLAGS) $(INCFLAGS) -MMD -MP -c $< -o $@ 2>> compile_time.txt
+	@$(CXX) $(CXXFLAGS) $(INCFLAGS) -MMD -MP -c $< -o $@
 
 
 run: re
