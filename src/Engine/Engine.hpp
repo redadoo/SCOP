@@ -116,7 +116,9 @@ private:
 	std::vector<Vertex> vertices;
 	std::vector<uint32_t> indices;
 	Maft::Vector3f modelCenter;
-
+	Maft::Vector3f modelPosition{0.0f, 0.0f, 0.0f};
+	float moveSpeed = 2.0f;
+	
 	//sample
 	VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT;
 
@@ -203,6 +205,9 @@ private:
 	void generateMipmaps(VkImage image, VkFormat imageFormat, int32_t texWidth, int32_t texHeight, uint32_t mipLevels);
 	void createColorResources();
 	
+	//model
+	void changeMaterial();
+
 	//Depth
 	void createDepthResources();
 
