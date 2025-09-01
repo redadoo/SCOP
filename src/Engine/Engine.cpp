@@ -112,7 +112,6 @@ void Engine::initVulkan() {
 	createDescriptorSets();
 	createCommandBuffers();
 	createSyncObjects();
-
 }
 
 void Engine::createColorResources()
@@ -270,7 +269,7 @@ void Engine::loadModel()
 				};
 			}
 
-			vertex.color = {1.0f, 1.0f, 1.0f};
+			vertex.color = {0.5f, 0.0f, 0.5f};
 			if (uniqueVertices.count(vertex) == 0) 
 			{
 				uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
