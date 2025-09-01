@@ -229,24 +229,21 @@ void Engine::generateMipmaps(VkImage image,VkFormat imageFormat, int32_t texWidt
 
 void Engine::loadModel() 
 {
-	// obj_loader::Mesh mesh = obj_loader::parse(MODEL_PATH);
-	// std::unordered_map<Vertex, uint32_t> uniqueVertices{};
+    tinyobj::attrib_t attrib;
+    std::vector<tinyobj::shape_t> shapes;
+    std::vector<tinyobj::material_t> materials;
+    std::string warn, err;
 
-	tinyobj::attrib_t attrib;
-	std::vector<tinyobj::shape_t> shapes;
-	std::vector<tinyobj::material_t> materials;
-	std::string warn, err;
+    if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, MODEL_PATH.c_str()))
+        throw std::runtime_error(warn + err);
 
-	if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, MODEL_PATH.c_str()))
-		throw std::runtime_error(warn + err);
+    std::unordered_map<Vertex, uint32_t> uniqueVertices{};
 
-	std::unordered_map<Vertex, uint32_t> uniqueVertices{};
-	
-	Maft::Vector3f minPos(FLT_MAX, FLT_MAX, FLT_MAX);
-	Maft::Vector3f maxPos(-FLT_MAX, -FLT_MAX, -FLT_MAX);
+    Maft::Vector3f minPos(FLT_MAX, FLT_MAX, FLT_MAX);
+    Maft::Vector3f maxPos(-FLT_MAX, -FLT_MAX, -FLT_MAX);
 
-	for (const auto& shape : shapes) 
-	{
+    for (const auto& shape : shapes) 
+    {
 		for (const auto& index : shape.mesh.indices) 
 		{
 			Vertex vertex{};
@@ -282,14 +279,14 @@ void Engine::loadModel()
 			
 			indices.push_back(uniqueVertices[vertex]);
 		}
-	}
+    }
 
-	Maft::Vector3f center = (minPos + maxPos) * 0.5f;
+    Maft::Vector3f center = (minPos + maxPos) * 0.5f;
 
-	for (auto& vertex : vertices) 
-		vertex.pos -= center;
+    for (auto& vertex : vertices) 
+        vertex.pos -= center;
 
-	modelCenter = center;
+    modelCenter = center;
 }
 
 bool Engine::hasStencilComponent(VkFormat format)
@@ -1543,7 +1540,7 @@ void Engine::mainLoop()
 		Maft::Vector3f dir{0.0f, 0.0f, 0.0f};
 
 		//movement key
-		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) dir.x -= 1.0f; 
+		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) dir.z -= 1.0f; 
 		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) dir.z += 1.0f;
 		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) dir.x -= 1.0f;
 		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) dir.x += 1.0f;
@@ -1552,7 +1549,6 @@ void Engine::mainLoop()
 		
 		//other actions
 		if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) changeMaterial();
-
 
 		if (length(dir) > 0.0f) dir = normalize(dir) * moveSpeed * deltaTime;
 
@@ -1633,7 +1629,7 @@ void Engine::drawFrame()
 	currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 }
 
-void Engine::updateUniformBuffer(uint32_t currentImage) 
+void Engine::updateUniformBuffer(uint32_t currentImage)
 {
 	static auto startTime = std::chrono::high_resolution_clock::now();
 	auto currentTime = std::chrono::high_resolution_clock::now();
