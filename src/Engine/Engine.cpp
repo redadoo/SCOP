@@ -235,16 +235,22 @@ void Engine::loadModel()
     
 	for (const auto& shape : mesh.shapes)
 	{
-		Maft::Vector3f color(1.0f, 1.0f, 1.0f);
-		if (!shape.material_name.empty() && mesh.materials.count(shape.material_name))
-		{
-			color.x = mesh.materials.at(shape.material_name).Kd[0];
-			color.y = mesh.materials.at(shape.material_name).Kd[1];
-			color.z = mesh.materials.at(shape.material_name).Kd[2];
-		}
-
+		// Maft::Vector3f color(1.0f, 1.0f, 1.0f);
+		// if (!shape.material_name.empty() && mesh.materials.count(shape.material_name))
+		// {
+		// 	color.x = mesh.materials.at(shape.material_name).Kd[0];
+		// 	color.y = mesh.materials.at(shape.material_name).Kd[1];
+		// 	color.z = mesh.materials.at(shape.material_name).Kd[2];
+		// }
+		
 		for (const auto& face : shape.faces)
 		{
+			Maft::Vector3f faceColor{
+				static_cast<float>(rand()) / RAND_MAX,
+				static_cast<float>(rand()) / RAND_MAX,
+				static_cast<float>(rand()) / RAND_MAX
+			};
+			
 			for (size_t i = 1; i + 1 < face.size(); i++)
 			{
 				const obj_loader::FaceVertex fv[3] = { face[0], face[i], face[i+1] };
@@ -253,7 +259,7 @@ void Engine::loadModel()
 				{
 					Vertex vertex{};
 
-					vertex.color = color;
+					vertex.color = faceColor;
 
 					const auto& v = mesh.attrib.vertices[fv[j].vertex_index];
 					vertex.pos.x = v.x;
@@ -269,17 +275,6 @@ void Engine::loadModel()
 					else
 						vertex.normal = {0.0f, 0.0f, 1.0f};
 
-					if (fv[j].textcoord_index >= 0)
-					{
-						const auto& uv = mesh.attrib.texcoords[fv[j].textcoord_index];
-						vertex.texCoord.x = uv.x;
-						vertex.texCoord.y = 1.0f - uv.y;
-					}
-					else
-						vertex.texCoord = {0.0f, 0.0f};
-
-					indices.push_back(static_cast<uint32_t>(vertices.size()));
-					vertices.push_back(vertex);
 
 					minPos.x = std::min(minPos.x, vertex.pos.x);
 					minPos.y = std::min(minPos.y, vertex.pos.y);
@@ -288,6 +283,25 @@ void Engine::loadModel()
 					maxPos.x = std::max(maxPos.x, vertex.pos.x);
 					maxPos.y = std::max(maxPos.y, vertex.pos.y);
 					maxPos.z = std::max(maxPos.z, vertex.pos.z);
+
+					Maft::Vector3f size = maxPos - minPos;
+
+					if (fv[j].textcoord_index >= 0)
+					{
+						const auto& uv = mesh.attrib.texcoords[fv[j].textcoord_index];
+						vertex.texCoord.x = uv.x;
+						vertex.texCoord.y = 1.0f - uv.y;
+					}
+					else
+					{
+						const auto& pos = mesh.attrib.vertices[fv[j].vertex_index];
+						vertex.texCoord.x = (pos.x - minPos.x) / size.x;
+						vertex.texCoord.y = (pos.y - minPos.y) / size.y;
+					}
+
+					indices.push_back(static_cast<uint32_t>(vertices.size()));
+					vertices.push_back(vertex);
+
 				}
 			}
 		}

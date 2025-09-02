@@ -137,7 +137,7 @@ private:
 	const uint32_t MODEL_HEIGHT = 600;
 
 	const std::string MODEL_PATH = "models/42.obj";
-	const std::string TEXTURE_PATH = "textures/texture.jpg";
+	const std::string TEXTURE_PATH = "textures/cat.jpg";
 
 	const int MAX_FRAMES_IN_FLIGHT = 2;
 
