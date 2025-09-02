@@ -49,6 +49,11 @@ To build and run the project:
 ```bash
 make run
 ```
+## TO-DO
+
+* Refact engine codebase
+* check leak 
+
 ## Resources
 
 * [GLFW](https://www.glfw.org/)
