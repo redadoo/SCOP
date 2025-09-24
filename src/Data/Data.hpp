@@ -62,10 +62,9 @@ struct Vertex {
 namespace std {
     template<> struct hash<Vertex> {
         size_t operator()(Vertex const& vertex) const {
-            size_t h1 = hash<Maft::Vector3f>()(vertex.pos);
-            size_t h2 = hash<Maft::Vector2f>()(vertex.texCoord);
-            size_t h3 = hash<Maft::Vector3f>()(vertex.normal);
-            return ((h1 ^ (h2 << 1)) >> 1) ^ (h3 << 1);
+            return  ((hash<Maft::Vector3f>()(vertex.pos) ^
+                    (hash<Maft::Vector3f>()(vertex.color) << 1)) >> 1) ^
+                    (hash<Maft::Vector2f>()(vertex.texCoord) << 1);
         }
     };
 }

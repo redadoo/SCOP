@@ -224,87 +224,78 @@ void Engine::generateMipmaps(VkImage image,VkFormat imageFormat, int32_t texWidt
 
 void Engine::loadModel()
 {
-	obj_loader::Mesh mesh = obj_loader::parse_obj_file(MODEL_PATH);
+    obj_loader::Mesh mesh = obj_loader::parse_obj_file(MODEL_PATH);
 
     std::unordered_map<Vertex, uint32_t> uniqueVertices{};
 
     Maft::Vector3f minPos(FLT_MAX, FLT_MAX, FLT_MAX);
     Maft::Vector3f maxPos(-FLT_MAX, -FLT_MAX, -FLT_MAX);
-    
-	for (const auto& shape : mesh.shapes)
-	{
-		// Maft::Vector3f color(1.0f, 1.0f, 1.0f);
-		// if (!shape.material_name.empty() && mesh.materials.count(shape.material_name))
-		// {
-		// 	color.x = mesh.materials.at(shape.material_name).Kd[0];
-		// 	color.y = mesh.materials.at(shape.material_name).Kd[1];
-		// 	color.z = mesh.materials.at(shape.material_name).Kd[2];
-		// }
-		
-		for (const auto& face : shape.faces)
-		{
-			Maft::Vector3f faceColor{
-				static_cast<float>(rand()) / RAND_MAX,
-				static_cast<float>(rand()) / RAND_MAX,
-				static_cast<float>(rand()) / RAND_MAX
-			};
-			
-			for (size_t i = 1; i + 1 < face.size(); i++)
-			{
-				const obj_loader::FaceVertex fv[3] = { face[0], face[i], face[i+1] };
 
-				for (int j = 0; j < 3; j++)
-				{
-					Vertex vertex{};
+    for (const auto& shape : mesh.shapes)
+    {
+        for (const auto& face : shape.faces)
+        {
+            float colorComponent = static_cast<float>(rand()) / RAND_MAX;
 
-					vertex.color = faceColor;
+            Maft::Vector3f faceColor{ colorComponent, colorComponent, colorComponent };
 
-					const auto& v = mesh.attrib.vertices[fv[j].vertex_index];
-					vertex.pos.x = v.x;
-					vertex.pos.y = v.y;
-					vertex.pos.z = v.z;
+            for (size_t i = 1; i + 1 < face.size(); i++)
+            {
+                const obj_loader::FaceVertex fv[3] = { face[0], face[i], face[i + 1] };
 
-					if (fv[j].normal_index >= 0)
-					{
-						vertex.normal.x = mesh.attrib.normals[fv[j].normal_index].x;
-						vertex.normal.y = mesh.attrib.normals[fv[j].normal_index].y;
-						vertex.normal.z = mesh.attrib.normals[fv[j].normal_index].z;
-					}
-					else
-						vertex.normal = {0.0f, 0.0f, 1.0f};
+                for (int j = 0; j < 3; j++)
+                {
+                    Vertex vertex{};
 
+                    vertex.color = faceColor;
 
-					minPos.x = std::min(minPos.x, vertex.pos.x);
-					minPos.y = std::min(minPos.y, vertex.pos.y);
-					minPos.z = std::min(minPos.z, vertex.pos.z);
+                    const auto& v = mesh.attrib.vertices[fv[j].vertex_index];
+                    vertex.pos.x = v.x;
+                    vertex.pos.y = v.y;
+                    vertex.pos.z = v.z;
 
-					maxPos.x = std::max(maxPos.x, vertex.pos.x);
-					maxPos.y = std::max(maxPos.y, vertex.pos.y);
-					maxPos.z = std::max(maxPos.z, vertex.pos.z);
+                    if (fv[j].normal_index >= 0)
+                    {
+                        vertex.normal.x = mesh.attrib.normals[fv[j].normal_index].x;
+                        vertex.normal.y = mesh.attrib.normals[fv[j].normal_index].y;
+                        vertex.normal.z = mesh.attrib.normals[fv[j].normal_index].z;
+                    }
+                    else
+                        vertex.normal = {0.0f, 0.0f, 1.0f};
 
-					Maft::Vector3f size = maxPos - minPos;
+                    minPos.x = std::min(minPos.x, vertex.pos.x);
+                    minPos.y = std::min(minPos.y, vertex.pos.y);
+                    minPos.z = std::min(minPos.z, vertex.pos.z);
 
-					if (fv[j].textcoord_index >= 0)
-					{
-						const auto& uv = mesh.attrib.texcoords[fv[j].textcoord_index];
-						vertex.texCoord.x = uv.x;
-						vertex.texCoord.y = 1.0f - uv.y;
-					}
-					else
-					{
-						const auto& pos = mesh.attrib.vertices[fv[j].vertex_index];
-						vertex.texCoord.x = (pos.x - minPos.x) / size.x;
-						vertex.texCoord.y = (pos.y - minPos.y) / size.y;
-					}
+                    maxPos.x = std::max(maxPos.x, vertex.pos.x);
+                    maxPos.y = std::max(maxPos.y, vertex.pos.y);
+                    maxPos.z = std::max(maxPos.z, vertex.pos.z);
 
-					indices.push_back(static_cast<uint32_t>(vertices.size()));
-					vertices.push_back(vertex);
+                    Maft::Vector3f size = maxPos - minPos;
 
-				}
-			}
-		}
-	}
+                    if (fv[j].textcoord_index >= 0)
+                    {
+                        const auto& uv = mesh.attrib.texcoords[fv[j].textcoord_index];
+                        vertex.texCoord.x = uv.x;
+                        vertex.texCoord.y = 1.0f - uv.y;
+                    }
+                    else
+                    {
+                        const auto& pos = mesh.attrib.vertices[fv[j].vertex_index];
+                        vertex.texCoord.x = (pos.x - minPos.x) / size.x;
+                        vertex.texCoord.y = (pos.y - minPos.y) / size.y;
+                    }
 
+					if (uniqueVertices.count(vertex) == 0) {
+                	    uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
+                    	vertices.push_back(vertex);
+                	}
+
+                    indices.push_back(static_cast<uint32_t>(uniqueVertices[vertex]));
+                }
+            }
+        }
+    }
 
     Maft::Vector3f center = (minPos + maxPos) * 0.5f;
 
@@ -313,6 +304,7 @@ void Engine::loadModel()
 
     modelCenter = center;
 }
+
 
 bool Engine::hasStencilComponent(VkFormat format)
 {
@@ -1312,10 +1304,10 @@ void Engine::pickPhysicalDevice()
 
 int Engine::rateDeviceSuitability(VkPhysicalDevice device)
 {
-	VkPhysicalDeviceFeatures deviceFeatures;
-	VkPhysicalDeviceProperties deviceProperties;
-	vkGetPhysicalDeviceProperties(device, &deviceProperties);
-	vkGetPhysicalDeviceProperties(device, &deviceProperties);
+    VkPhysicalDeviceProperties deviceProperties;
+    VkPhysicalDeviceFeatures deviceFeatures;
+    vkGetPhysicalDeviceProperties(device, &deviceProperties);
+    vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
 
 	int score = 0;
 	// std::cout << deviceProperties.deviceName << "\n";
@@ -1577,13 +1569,6 @@ void Engine::createInstance()
 		throw std::runtime_error("failed to create instance!");
 }
 
-template<typename T>
-T length(const Maft::Vector<3, T>& v)
-{
-    return std::sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
-}
-
-
 void Engine::mainLoop()
 {
 	static auto lastTime = std::chrono::high_resolution_clock::now();
@@ -1616,7 +1601,7 @@ void Engine::mainLoop()
 
 		rPressedLastFrame = rPressed;
 
-		if (length(dir) > 0.0f) dir = normalize(dir) * moveSpeed * deltaTime;
+		if (Maft::Vector3f::magnitude(dir) > 0.0f) dir = normalize(dir) * moveSpeed * deltaTime;
 
 		modelPosition += dir;
 

@@ -39,7 +39,6 @@ MAKEFLAGS += --no-print-directory
 .PHONY: all clean fclean re run leaks shaders
 
 all:
-	@$(MAKE) shaders
 	@$(MAKE) $(NAME)
 
 $(NAME): $(OBJ)
@@ -57,7 +56,7 @@ run: re
 	./$(NAME) cmd 2>error
 
 leaks: re
-	valgrind --track-origins=yes --leak-check=full --show-leak-kinds=all --log-file=leaks.txt ./$(NAME)
+	@valgrind --tool=memcheck --leak-check=full --track-origins=yes --show-leak-kinds=all --log-file=leaks.txt ./$(NAME)
 
 shaders:
 	@echo "$(YELLOW)[Compiling shader] $< -> $@$(RESET)"
@@ -68,7 +67,7 @@ clean:
 	@echo "$(GRAY)✗ Object files cleaned$(RESET)"
 
 fclean: clean
-	@rm -f $(NAME) leaks.txt error $(SHADERDIR)/*.spv
+	@rm -f $(NAME) leaks.txt error
 	@echo "$(GRAY)✗ Binary, shaders and extra files cleaned$(RESET)"
 
 re: fclean all
