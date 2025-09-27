@@ -56,7 +56,7 @@ run: re
 	./$(NAME) cmd 2>error
 
 leaks: re
-	@valgrind --tool=memcheck --leak-check=full --track-origins=yes --show-leak-kinds=all --log-file=leaks.txt ./$(NAME)
+	@valgrind --tool=memcheck --track-origins=yes --leak-check=full --show-leak-kinds=all --log-file=leaks.txt ./$(NAME)
 
 shaders:
 	@echo "$(YELLOW)[Compiling shader] $< -> $@$(RESET)"
@@ -67,7 +67,7 @@ clean:
 	@echo "$(GRAY)✗ Object files cleaned$(RESET)"
 
 fclean: clean
-	@rm -f $(NAME) leaks.txt error
+	@rm -f $(NAME) leaks.txt error $(SHADERDIR)/*.spv
 	@echo "$(GRAY)✗ Binary, shaders and extra files cleaned$(RESET)"
 
 re: fclean all

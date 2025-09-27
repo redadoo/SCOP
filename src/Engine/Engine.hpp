@@ -126,7 +126,6 @@ private:
 	//material
 	MaterialUBO materialUBO{};
 	VkBuffer materialUniformBuffer;
-	VkDeviceMemory materialUniformBufferMemory;
 	bool rPressedLastFrame = false;
 
 	//sample
@@ -217,8 +216,6 @@ private:
 	
 	//model
 	void changeMaterial();
-	void createMaterialUniformBuffer();
-	void updateMaterialUniformBuffer();
 	//Depth
 	void createDepthResources();
 

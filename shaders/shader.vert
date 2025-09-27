@@ -20,6 +20,5 @@ void main() {
     fragColor = inColor;
     fragTexCoord = inTexCoord;
 
-    // Transform the normal into world space
     fragNormal = mat3(transpose(inverse(ubo.model))) * inNormal;
 }
