@@ -1602,7 +1602,7 @@ void Engine::mainLoop()
 
 		modelPosition += dir;
 
-		drawFrame();
+		drawFrame(deltaTime);
 	}
 	vkDeviceWaitIdle(device);
 }
@@ -1612,7 +1612,7 @@ void Engine::changeMaterial()
     useTexture = !useTexture;
 }
 
-void Engine::drawFrame()
+void Engine::drawFrame(float deltaTime)
 {
 	vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
@@ -1626,7 +1626,7 @@ void Engine::drawFrame()
 		throw std::runtime_error("failed to acquire swap chain image!");
 	}
 
-	updateUniformBuffer(currentFrame);
+	updateUniformBuffer(currentFrame, deltaTime);
 
 	vkResetFences(device, 1, &inFlightFences[currentFrame]);
 
@@ -1677,25 +1677,32 @@ void Engine::drawFrame()
 	currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 }
 
-void Engine::updateUniformBuffer(uint32_t currentImage)
+void Engine::updateUniformBuffer(uint32_t currentImage, float deltaTime)
 {
-	static auto startTime = std::chrono::high_resolution_clock::now();
-	auto currentTime = std::chrono::high_resolution_clock::now();
-	float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+    static float rotationAngle = 0.0f;
+    rotationAngle += 90.0f * deltaTime;
+    if (rotationAngle > 360.0f) rotationAngle -= 360.0f;
 
-	UniformBufferObject ubo{};
+    ubo.model = Maft::rotate(Maft::Matrix4x4f::Identity(),
+                             Maft::radians(rotationAngle),
+                             Maft::Vector3f(0.0f, 1.0f, 0.0f));
+    ubo.model = Maft::translate(Maft::Matrix4x4f::Identity(), modelPosition) * ubo.model;
 
-    Maft::Matrix4x4f rotation = Maft::rotate(Maft::Matrix4x4f::Identity(), time * Maft::radians(90.0f),Maft::Vector3f(0.0f, 90.0f, 0.0f));
-    Maft::Matrix4x4f translation = Maft::translate(Maft::Matrix4x4f::Identity(), modelPosition);
-    ubo.model = translation * rotation;
+    static bool initialized = false;
+    if (!initialized) {
+        ubo.view = Maft::lookAt(Maft::Vector3f(1.0f, 1.0f, 5.0f),
+                                Maft::Vector3f(0.0f, 0.0f, 0.0f),
+                                Maft::Vector3f(0.0f, 1.0f, 0.0f));
+        ubo.proj = Maft::perspective(Maft::radians(80.0f),
+                                     swapChainExtent.width / (float) swapChainExtent.height,
+                                     0.1f, 10.0f);
+        ubo.proj(1,1) *= -1;
+        initialized = true;
+    }
 
-	ubo.view = Maft::lookAt(Maft::Vector3f(1.0f, 1.0f, 5.0f), Maft::Vector3f(0.0f, 0.0f, 0.0f), Maft::Vector3f(0.0f, 1.0f, 0.0f));
-	ubo.proj = Maft::perspective(Maft::radians(80.0f), swapChainExtent.width / (float) swapChainExtent.height, 0.1f, 10.0f);
-	ubo.proj(1,1) *= -1;
-
-
-	memcpy(uniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
+    memcpy(uniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
 }
+
 
 uint32_t Engine::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) {
 	VkPhysicalDeviceMemoryProperties memProperties;

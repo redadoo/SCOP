@@ -87,6 +87,8 @@ private:
 	uint32_t currentFrame = 0;
 
 	//buffer
+	UniformBufferObject ubo{};
+
 	VkBuffer vertexBuffer;
 	VkDeviceMemory vertexBufferMemory;
 	VkBuffer indexBuffer;
@@ -192,7 +194,7 @@ private:
 	void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 	void createIndexBuffer();
 	void createUniformBuffers();
-	void updateUniformBuffer(uint32_t currentImage);
+	void updateUniformBuffer(uint32_t currentImage, float deltaTime);
 	VkCommandBuffer beginSingleTimeCommands();
 	void endSingleTimeCommands(VkCommandBuffer commandBuffer);
 
@@ -228,7 +230,7 @@ private:
 
 	// main loop
 	void mainLoop();
-	void drawFrame();
+	void drawFrame(float deltaTime);
 
 	// Cleanup
 	void cleanup();
