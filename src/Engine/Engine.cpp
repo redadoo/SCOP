@@ -1679,23 +1679,26 @@ void Engine::drawFrame()
 
 void Engine::updateUniformBuffer(uint32_t currentImage)
 {
-	static auto startTime = std::chrono::high_resolution_clock::now();
-	auto currentTime = std::chrono::high_resolution_clock::now();
-	float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+    static auto startTime = std::chrono::high_resolution_clock::now();
+    auto currentTime = std::chrono::high_resolution_clock::now();
+    float time = std::chrono::duration<float>(currentTime - startTime).count();
 
-	UniformBufferObject ubo{};
+    UniformBufferObject ubo{};
 
-    Maft::Matrix4x4f rotation = Maft::rotate(Maft::Matrix4x4f::Identity(), time * Maft::radians(90.0f),Maft::Vector3f(0.0f, 90.0f, 0.0f));
-    Maft::Matrix4x4f translation = Maft::translate(Maft::Matrix4x4f::Identity(), modelPosition);
-    ubo.model = translation * rotation;
+    ubo.rotation = Maft::rotate(Maft::Matrix4x4f::Identity(), time * Maft::radians(90.0f), Maft::Vector3f(0.0f, 1.0f, 0.0f));
+    ubo.translation = Maft::translate(Maft::Matrix4x4f::Identity(), modelPosition);
 
-	ubo.view = Maft::lookAt(Maft::Vector3f(1.0f, 1.0f, 5.0f), Maft::Vector3f(0.0f, 0.0f, 0.0f), Maft::Vector3f(0.0f, 1.0f, 0.0f));
-	ubo.proj = Maft::perspective(Maft::radians(80.0f), swapChainExtent.width / (float) swapChainExtent.height, 0.1f, 10.0f);
-	ubo.proj(1,1) *= -1;
+    ubo.view = Maft::lookAt(Maft::Vector3f(1.0f, 1.0f, 5.0f),
+                             Maft::Vector3f(0.0f, 0.0f, 0.0f),
+                             Maft::Vector3f(0.0f, 1.0f, 0.0f));
+    ubo.proj = Maft::perspective(Maft::radians(80.0f),
+                                 swapChainExtent.width / (float) swapChainExtent.height,
+                                 0.1f, 10.0f);
+    ubo.proj(1,1) *= -1;
 
-
-	memcpy(uniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
+    memcpy(uniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
 }
+
 
 uint32_t Engine::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) {
 	VkPhysicalDeviceMemoryProperties memProperties;
