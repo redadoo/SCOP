@@ -42,8 +42,8 @@ public:
 private:
     // Window
     GLFWwindow* window;
-    const uint32_t WIDTH = 800;
-    const uint32_t HEIGHT = 600;
+    const uint32_t WIDTH = 400;
+    const uint32_t HEIGHT = 300;
 
     // Vulkan Core
     VkInstance instance;
@@ -125,7 +125,6 @@ private:
 
 	//material
 	int useTexture = 0;
-	VkBuffer materialUniformBuffer;
 	bool rPressedLastFrame = false;
 
 	//sample
