@@ -19,9 +19,7 @@
 #include <unordered_map>
 #include "Data.hpp"
 
-struct MaterialUBO {
-    int useTexture = 0;
-};
+
 
 struct QueueFamilyIndices {
     std::optional<uint32_t> graphicsFamily;
@@ -124,7 +122,7 @@ private:
 	float moveSpeed = 2.0f;
 
 	//material
-	MaterialUBO materialUBO{};
+	int useTexture = 0;
 	VkBuffer materialUniformBuffer;
 	bool rPressedLastFrame = false;
 

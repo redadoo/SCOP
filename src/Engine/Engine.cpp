@@ -1467,10 +1467,8 @@ void Engine::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIn
 
     vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-    // 1. Bind pipeline
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
 
-    // 2. Set viewport & scissor
     VkViewport viewport{};
     viewport.x = 0.0f;
     viewport.y = 0.0f;
@@ -1485,28 +1483,24 @@ void Engine::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIn
     scissor.extent = swapChainExtent;
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-    // 3. Bind vertex/index buffers
     VkBuffer vertexBuffers[] = {vertexBuffer};
     VkDeviceSize offsets[] = {0};
     vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
 
     vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
-    // 4. Bind descriptor sets
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
                             pipelineLayout, 0, 1, &descriptorSets[currentFrame], 0, nullptr);
 
-    // 5. Push constants (NEW!)
     vkCmdPushConstants(
         commandBuffer,
         pipelineLayout,
         VK_SHADER_STAGE_FRAGMENT_BIT,
         0,
         sizeof(int),
-        &materialUBO.useTexture
+        &useTexture
     );
 
-    // 6. Issue draw
     vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
 
     vkCmdEndRenderPass(commandBuffer);
@@ -1615,7 +1609,7 @@ void Engine::mainLoop()
 
 void Engine::changeMaterial()
 {
-    materialUBO.useTexture = materialUBO.useTexture == 1 ? 0 : 1;
+    useTexture = !useTexture;
 }
 
 void Engine::drawFrame()

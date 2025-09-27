@@ -51,7 +51,6 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
 	@echo "$(YELLOW)[Compiling] $<$(RESET)"
 	@$(CXX) $(CXXFLAGS) $(INCFLAGS) -MMD -MP -c $< -o $@
 
-
 run: re
 	./$(NAME) cmd 2>error
 
@@ -67,7 +66,7 @@ clean:
 	@echo "$(GRAY)✗ Object files cleaned$(RESET)"
 
 fclean: clean
-	@rm -f $(NAME) leaks.txt error $(SHADERDIR)/*.spv
+	# @rm -f $(NAME) leaks.txt error $(SHADERDIR)/*.spv
 	@echo "$(GRAY)✗ Binary, shaders and extra files cleaned$(RESET)"
 
 re: fclean all
