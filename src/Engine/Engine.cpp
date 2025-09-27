@@ -464,8 +464,8 @@ void Engine::createImage(uint32_t width, uint32_t height, uint32_t mipLevels, Vk
 
 void Engine::createTextureImage()
 {
-	int texWidth = 2000;
-	int texHeight = 2000;
+	int texWidth = 225;
+	int texHeight = 225;
     int texChannels = 4;
     VkDeviceSize imageSize = texWidth * texHeight * texChannels;
 
@@ -1630,7 +1630,7 @@ void Engine::drawFrame()
 
 	vkResetFences(device, 1, &inFlightFences[currentFrame]);
 
-	vkResetCommandBuffer(commandBuffers[currentFrame], /*VkCommandBufferResetFlagBits*/ 0);
+	vkResetCommandBuffer(commandBuffers[currentFrame], 0);
 	recordCommandBuffer(commandBuffers[currentFrame], imageIndex);
 
 	VkSubmitInfo submitInfo{};
@@ -1692,6 +1692,7 @@ void Engine::updateUniformBuffer(uint32_t currentImage)
 	ubo.view = Maft::lookAt(Maft::Vector3f(1.0f, 1.0f, 5.0f), Maft::Vector3f(0.0f, 0.0f, 0.0f), Maft::Vector3f(0.0f, 1.0f, 0.0f));
 	ubo.proj = Maft::perspective(Maft::radians(80.0f), swapChainExtent.width / (float) swapChainExtent.height, 0.1f, 10.0f);
 	ubo.proj(1,1) *= -1;
+
 
 	memcpy(uniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
 }
