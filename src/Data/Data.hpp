@@ -7,10 +7,9 @@
 #include "../../lib/Matrix/src/utils/matrix_utils.hpp"
 
 struct UniformBufferObject {
-    Maft::Matrix4x4f translation;
-    Maft::Matrix4x4f rotation;
-    Maft::Matrix4x4f view;
-    Maft::Matrix4x4f proj;
+	alignas(16) Maft::Matrix4x4f model;
+	alignas(16) Maft::Matrix4x4f view;
+	alignas(16) Maft::Matrix4x4f proj;
 };
 
 struct Vertex {
