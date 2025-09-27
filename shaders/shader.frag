@@ -17,10 +17,8 @@ void main() {
     vec3 lightDir = normalize(vec3(0.5, 1.0, 0.3));
     float diffuse = max(dot(normal, lightDir), 0.0);
 
-    vec3 baseColor = (pc.useTexture == 1)
-        ? texture(texSampler, fragTexCoord).rgb
-        : fragColor;
-
+    vec3 texColor = texture(texSampler, fragTexCoord).rgb;
+    vec3 baseColor = mix(fragColor, texColor, float(pc.useTexture));
     vec3 finalColor = baseColor * (0.2 + 0.8 * diffuse);
     outColor = vec4(finalColor, 1.0);
 }
