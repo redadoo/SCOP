@@ -131,8 +131,8 @@ private:
 	VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT;
 
 	// const
-	const uint32_t MODEL_WIDTH = 800;
-	const uint32_t MODEL_HEIGHT = 600;
+	const uint32_t MODEL_WIDTH = 400;
+	const uint32_t MODEL_HEIGHT = 300;
 
 	const std::string MODEL_PATH = "models/42.obj";
 	const std::string TEXTURE_PATH = "textures/cat1.rgba";
