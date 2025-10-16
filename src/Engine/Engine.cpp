@@ -1572,45 +1572,56 @@ void Engine::createInstance()
 
 void Engine::mainLoop()
 {
-	static auto lastTime = std::chrono::high_resolution_clock::now();
+    ZoneScopedN("Frame");
 
-	while (!glfwWindowShouldClose(window))
-	{
-		FrameMark;
-		
-		auto currentTime = std::chrono::high_resolution_clock::now();
+    static auto lastTime = std::chrono::high_resolution_clock::now();
+
+    while (!glfwWindowShouldClose(window))
+    {		
+        auto currentTime = std::chrono::high_resolution_clock::now();
         float deltaTime = std::chrono::duration<float>(currentTime - lastTime).count();
         lastTime = currentTime;
 
-		glfwPollEvents();
+        ZoneScopedN("Input handling");
+        glfwPollEvents();
 
-		Maft::Vector3f dir{0.0f, 0.0f, 0.0f};
+        Maft::Vector3f dir{0.0f, 0.0f, 0.0f};
 
-		//movement key
-		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) dir.z -= 1.0f;
-		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) dir.z += 1.0f;
-		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) dir.x -= 1.0f;
-		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) dir.x += 1.0f;
-		if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) dir.y += 1.0f;
-		if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) dir.y -= 1.0f;
+        // movement keys
+        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) dir.z -= 1.0f;
+        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) dir.z += 1.0f;
+        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) dir.x -= 1.0f;
+        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) dir.x += 1.0f;
+        if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) dir.y += 1.0f;
+        if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) dir.y -= 1.0f;
 
-		//other actions
-        
-		if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) break;
-		
-		bool rPressed = glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS;
+        if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) break;
+
+        bool rPressed = glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS;
         if (rPressed && !rPressedLastFrame)
+        {
+            ZoneScopedN("Change Material");
             changeMaterial();
+        }
+        rPressedLastFrame = rPressed;
 
-		rPressedLastFrame = rPressed;
+        if (Maft::Vector3f::magnitude(dir) > 0.0f)
+        {
+            ZoneScopedN("Movement");
+            dir = normalize(dir) * moveSpeed * deltaTime;
+        }
 
-		if (Maft::Vector3f::magnitude(dir) > 0.0f) dir = normalize(dir) * moveSpeed * deltaTime;
+        modelPosition += dir;
 
-		modelPosition += dir;
+        {
+            ZoneScopedN("Draw Frame");
+            drawFrame(deltaTime);
+        }
 
-		drawFrame(deltaTime);
-	}
-	vkDeviceWaitIdle(device);
+        FrameMark;
+    }
+
+    vkDeviceWaitIdle(device);
 }
 
 void Engine::changeMaterial()
