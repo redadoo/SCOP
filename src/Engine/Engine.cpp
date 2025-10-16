@@ -65,6 +65,8 @@ void Engine::run()
 }
 
 static void framebufferResizeCallback(GLFWwindow* window, int width, int height) {
+	(void)width;
+	(void)height;
 	auto app = reinterpret_cast<Engine*>(glfwGetWindowUserPointer(window));
 	app->framebufferResized = true;
 }
@@ -698,6 +700,8 @@ void Engine::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize siz
 
 void Engine::transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels)
 {
+	(void)format;
+	
 	VkCommandBuffer commandBuffer = beginSingleTimeCommands();
 
 	VkImageMemoryBarrier barrier{};
@@ -1572,6 +1576,8 @@ void Engine::mainLoop()
 
 	while (!glfwWindowShouldClose(window))
 	{
+		FrameMark;
+		
 		auto currentTime = std::chrono::high_resolution_clock::now();
         float deltaTime = std::chrono::duration<float>(currentTime - lastTime).count();
         lastTime = currentTime;

@@ -7,20 +7,20 @@ NAME        := SCOP
 
 # Compiler & Flags
 CXX         := g++
-CXXFLAGS    := -std=c++17 -O3
+CXXFLAGS    := -std=c++17 -O3 -DTRACY_ENABLE
 LDFLAGS     := -lglfw -lvulkan -ldl -lpthread -lX11 -lXxf86vm -lXrandr -lXi
 
 # Directories
 SRCDIR      := src
 OBJDIR      := .obj
-INCDIRS     := src src/utility src/Engine src/Data
+INCDIRS     := src src/utility src/Engine src/Data src/Tracy src/Tracy/common src/Tracy/client 
 
 # Shader files
 SHADERDIR   := shaders
 SHADERSRC   := $(wildcard $(SHADERDIR)/*.vert $(SHADERDIR)/*.frag)
 
 # Source files
-SRCFILES    := main Engine/Engine utility/utility
+SRCFILES    := main Engine/Engine utility/utility Tracy/TracyClient
 SRC         := $(addprefix $(SRCDIR)/, $(SRCFILES:=.cpp))
 OBJ         := $(addprefix $(OBJDIR)/, $(SRCFILES:=.o))
 DEPS        := $(OBJ:.o=.d)

@@ -19,6 +19,7 @@
 #include <unordered_map>
 #include "Data.hpp"
 
+#include "tracy/Tracy.hpp"
 
 
 struct QueueFamilyIndices {
@@ -137,7 +138,7 @@ private:
 	const std::string MODEL_PATH = "models/42.obj";
 	const std::string TEXTURE_PATH = "textures/cat1.rgba";
 
-	const int MAX_FRAMES_IN_FLIGHT = 2;
+	const size_t MAX_FRAMES_IN_FLIGHT = 2;
 
 	#ifdef NDEBUG
         const bool enableValidationLayers = false;
@@ -246,6 +247,10 @@ private:
 		const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
 		void* pUserData)
     {
+		(void)messageSeverity;
+		(void)messageType;
+		(void)pUserData;
+
 		std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
 
 		return VK_FALSE;
